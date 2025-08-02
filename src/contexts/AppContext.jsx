@@ -56,7 +56,7 @@ function appReducer(state, action) {
     
     case ActionTypes.LOAD_BOOKS:
       const { books, completedBooks } = action.payload;
-      
+
       // バックエンドデータをフロントエンド形式に変換
       const convertBook = (book) => ({
         id: book.id,
@@ -66,7 +66,7 @@ function appReducer(state, action) {
         targetDate: book.target_date,
         startedAt: book.started_at,
         currentPage: book.current_page,
-        readingHistory: [], // 初期化（後でAPIから取得）
+        readingHistory: book.readingHistory || [], // バックエンドから読み込んだ読書記録を使用
       });
       
       const currentBooks = books.filter(book => !book.is_completed).map(convertBook);
@@ -90,7 +90,7 @@ function appReducer(state, action) {
         targetDate: action.payload.target_date,
         startedAt: action.payload.started_at,
         currentPage: action.payload.current_page,
-        readingHistory: [],
+        readingHistory: action.payload.readingHistory || [], // バックエンドから読み込んだ読書記録を使用
       };
       return {
         ...state,
@@ -135,7 +135,11 @@ function appReducer(state, action) {
         ...state,
         currentBooks: state.currentBooks.map(book =>
           book.id === bookId
-            ? { ...book, readingHistory: [...book.readingHistory, newRecord] }
+            ? { 
+                ...book, 
+                readingHistory: [...book.readingHistory, newRecord],
+                currentPage: record.pages_read // 現在のページ数を更新
+              }
             : book
         ),
       };
@@ -305,11 +309,37 @@ export function AppProvider({ children }) {
     try {
       // 本のデータを読み込み
       const booksData = await apiCall('/api/books');
+      
+      // 各本の読書記録を読み込み
+      const booksWithHistory = await Promise.all(
+        booksData.books.map(async (book) => {
+          try {
+            const recordsData = await apiCall(`/api/books/${book.id}/records`);
+            return {
+              ...book,
+              readingHistory: (recordsData.records || []).map(record => ({
+                id: record.id,
+                date: record.date,
+                pagesRead: record.pages_read,
+                notes: record.notes,
+                percentage: record.percentage,
+              }))
+            };
+          } catch (error) {
+            console.error(`Failed to load reading records for book ${book.id}:`, error);
+            return {
+              ...book,
+              readingHistory: []
+            };
+          }
+        })
+      );
+      
       dispatch({ 
         type: ActionTypes.LOAD_BOOKS, 
         payload: { 
-          books: booksData.books,
-          completedBooks: booksData.books.filter(book => book.is_completed)
+          books: booksWithHistory,
+          completedBooks: booksWithHistory.filter(book => book.is_completed)
         } 
       });
 
