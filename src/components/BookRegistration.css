@@ -35,8 +35,10 @@
   box-shadow: var(--shadow-md);
 }
 
-.book-icon {
-  color: white;
+.book-registration-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .book-registration-title {

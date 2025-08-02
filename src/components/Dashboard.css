@@ -38,6 +38,18 @@
   color: inherit;
 }
 
+.greeting-logo {
+  margin-bottom: var(--space-md);
+  display: flex;
+  justify-content: center;
+}
+
+.dashboard-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
 .user-greeting h1 {
   font-size: var(--font-size-2xl);
   font-weight: 700;

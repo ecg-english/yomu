@@ -74,7 +74,7 @@ export default function BookRegistration({ isModal = false }) {
         {!isModal && (
           <div className="book-registration-header">
             <div className="icon-wrapper">
-              <BookOpen className="book-icon" size={40} />
+              <img src="/yomu-logo.png" alt="読む！" className="book-registration-logo" />
             </div>
             <h1 className="book-registration-title">
               {isFirstBook ? '読む！で最初の一冊を登録しましょう' : '新しい本を追加'}

@@ -54,7 +54,7 @@ export default function AuthScreen() {
       <div className="auth-container">
         <div className="auth-header">
           <div className="icon-wrapper">
-            <User className="auth-icon" size={48} />
+            <img src="/yomu-logo.png" alt="読む！" className="auth-logo" />
           </div>
           <h1 className="auth-title">読む！へようこそ</h1>
           <p className="auth-subtitle">
