@@ -1,0 +1,300 @@
+.book-registration {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, var(--color-background) 0%, var(--color-surface-secondary) 100%);
+}
+
+.book-registration-container {
+  max-width: 500px;
+  width: 100%;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-light);
+  animation: slideUp 0.6s ease-out;
+}
+
+.book-registration-header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.book-icon {
+  color: white;
+}
+
+.book-registration-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
+
+.book-registration-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.book-registration-form {
+  margin-bottom: var(--space-xl);
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.form-label.required::after {
+  content: '*';
+  color: var(--color-error);
+  margin-left: var(--space-xs);
+}
+
+.optional-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin-left: var(--space-xs);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+.book-registration-button {
+  width: 100%;
+  font-size: var(--font-size-lg);
+  padding: var(--space-md) var(--space-lg);
+  font-weight: 600;
+  margin-top: var(--space-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.book-registration-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.book-registration-button.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+.registration-tips {
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border-light);
+}
+
+.tips-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+  text-align: center;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.tip-item {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  padding-left: var(--space-md);
+  position: relative;
+}
+
+.tip-item::before {
+  content: '•';
+  color: var(--color-primary);
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.tip-item strong {
+  color: var(--color-text-primary);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 600px) {
+  .book-registration {
+    padding: var(--space-md);
+  }
+  
+  .book-registration-container {
+    padding: var(--space-xl) var(--space-lg);
+  }
+  
+  .book-registration-title {
+    font-size: var(--font-size-xl);
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .icon-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .book-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* 入力フィールドの拡張スタイル */
+.form-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.1);
+}
+
+/* 現在読書中の本の表示 */
+.current-books-info {
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-top: var(--space-xl);
+  border: 1px solid var(--color-border-light);
+}
+
+.current-books-info h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+  text-align: center;
+}
+
+.current-books-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.current-book-item {
+  background-color: var(--color-surface);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.current-book-item .book-title {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.current-book-item .book-author {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* モーダルスタイル */
+.book-registration.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-md);
+}
+
+.book-registration.modal .book-registration-container {
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: var(--color-background);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xl) var(--space-xl) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-xl);
+}
+
+.modal-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.close-modal-button {
+  padding: var(--space-sm);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+  margin-top: var(--space-lg);
+}
+
+.book-registration.modal .form-actions {
+  justify-content: space-between;
+}
+
+/* アニメーション */
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+} 

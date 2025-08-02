@@ -1,0 +1,109 @@
+.tab-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  height: var(--tab-height);
+}
+
+.tab-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-sm);
+}
+
+.tab-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  flex: 1;
+  height: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.tab-button:hover {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+}
+
+.tab-button.active {
+  color: var(--color-primary);
+  background-color: rgba(141, 181, 150, 0.08);
+}
+
+.tab-button.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 3px;
+  background-color: var(--color-primary);
+  border-radius: 0 0 3px 3px;
+}
+
+.tab-icon {
+  transition: transform 0.2s ease;
+}
+
+.tab-button.active .tab-icon {
+  transform: scale(1.1);
+}
+
+.tab-label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+  .tab-label {
+    font-size: 0.65rem;
+  }
+  
+  .tab-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .tab-button {
+    gap: 2px;
+    padding: var(--space-xs);
+  }
+}
+
+/* iPhone SE などの小さな画面対応 */
+@media (max-width: 375px) {
+  .tab-label {
+    display: none;
+  }
+  
+  .tab-button {
+    gap: 0;
+  }
+  
+  .tab-icon {
+    width: 22px;
+    height: 22px;
+  }
+} 

@@ -1,0 +1,6 @@
+services:
+  - type: static
+    name: yomu-frontend
+    env: static
+    buildCommand: "npm ci && npm run build"
+    staticPublishPath: dist 
