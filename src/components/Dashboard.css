@@ -45,8 +45,20 @@
 }
 
 .dashboard-logo {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.greeting-title {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-sm);
+}
+
+.dashboard-title-logo {
+  width: 150px;
+  height: 45px;
   object-fit: contain;
 }
 

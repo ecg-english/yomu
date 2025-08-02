@@ -19,10 +19,15 @@
   gap: var(--space-sm);
 }
 
-.calendar-title h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
+.calendar-title-logo {
+  display: flex;
+  align-items: center;
+}
+
+.calendar-logo {
+  width: 120px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .calendar-icon {

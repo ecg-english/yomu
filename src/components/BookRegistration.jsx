@@ -76,9 +76,9 @@ export default function BookRegistration({ isModal = false }) {
             <div className="icon-wrapper">
               <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="book-registration-logo" />
             </div>
-            <h1 className="book-registration-title">
-              {isFirstBook ? '読む！で最初の一冊を登録しましょう' : '新しい本を追加'}
-            </h1>
+            <div className="book-registration-title-wrapper">
+              <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="book-registration-title-logo" />
+            </div>
             <p className="book-registration-subtitle">
               {isFirstBook 
                 ? '読書の旅を始めるために、読みたい本の情報を入力してください'

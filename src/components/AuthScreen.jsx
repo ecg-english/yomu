@@ -56,7 +56,9 @@ export default function AuthScreen() {
           <div className="icon-wrapper">
             <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="auth-logo" />
           </div>
-          <h1 className="auth-title">読む！へようこそ</h1>
+          <div className="auth-title-wrapper">
+            <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="auth-title-logo" />
+          </div>
           <p className="auth-subtitle">
             {isLoginMode 
               ? 'アカウントにログインして読書を続けましょう'

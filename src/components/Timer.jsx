@@ -156,7 +156,9 @@ export default function Timer() {
         <header className="timer-header">
           <div className="timer-title">
             <TimerIcon className="timer-icon" size={24} />
-            <h1>読む！タイマー</h1>
+            <div className="timer-title-logo">
+              <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="timer-logo" />
+            </div>
           </div>
           
           {currentBooks.length > 0 && (

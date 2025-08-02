@@ -145,7 +145,9 @@ export default function Calendar() {
         <header className="calendar-header">
           <div className="calendar-title">
             <BookOpen className="calendar-icon" size={24} />
-            <h1>読む！カレンダー</h1>
+            <div className="calendar-title-logo">
+              <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="calendar-logo" />
+            </div>
           </div>
           
           <div className="calendar-stats">

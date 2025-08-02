@@ -19,10 +19,15 @@
   gap: var(--space-sm);
 }
 
-.book-list-title h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
+.book-list-title-logo {
+  display: flex;
+  align-items: center;
+}
+
+.book-list-logo {
+  width: 120px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .book-list-icon {
