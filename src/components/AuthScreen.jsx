@@ -53,9 +53,6 @@ export default function AuthScreen() {
     <div className="auth-screen">
       <div className="auth-container">
         <div className="auth-header">
-          <div className="icon-wrapper">
-            <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="auth-logo" />
-          </div>
           <div className="auth-title-wrapper">
             <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="auth-title-logo" />
           </div>

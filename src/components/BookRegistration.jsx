@@ -73,9 +73,6 @@ export default function BookRegistration({ isModal = false }) {
 
         {!isModal && (
           <div className="book-registration-header">
-            <div className="icon-wrapper">
-              <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="book-registration-logo" />
-            </div>
             <div className="book-registration-title-wrapper">
               <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="book-registration-title-logo" />
             </div>

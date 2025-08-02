@@ -70,9 +70,6 @@ export default function Dashboard() {
       <div className="container">
         <header className="dashboard-header">
           <div className="user-greeting">
-            <div className="greeting-logo">
-              <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="dashboard-logo" />
-            </div>
             <div className="greeting-title">
               <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="dashboard-title-logo" />
             </div>
