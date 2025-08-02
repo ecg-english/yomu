@@ -21,13 +21,57 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 });
 
-// ensure users table exists (simple migration)
+// Database migrations
 await pool.query(`
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+`);
+
+await pool.query(`
+CREATE TABLE IF NOT EXISTS books (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  author TEXT,
+  total_pages INTEGER,
+  target_date DATE,
+  started_at TIMESTAMP DEFAULT NOW(),
+  current_page INTEGER DEFAULT 0,
+  is_completed BOOLEAN DEFAULT FALSE,
+  completed_at TIMESTAMP,
+  final_review TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+`);
+
+await pool.query(`
+CREATE TABLE IF NOT EXISTS reading_records (
+  id SERIAL PRIMARY KEY,
+  book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  pages_read INTEGER NOT NULL,
+  notes TEXT,
+  percentage INTEGER NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+`);
+
+await pool.query(`
+CREATE TABLE IF NOT EXISTS book_wishlist (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  author TEXT,
+  amazon_link TEXT,
+  notes TEXT,
+  is_checked BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW()
 );
 `);
@@ -80,6 +124,239 @@ server.decorate('authenticate', async (request, reply) => {
     await request.jwtVerify();
   } catch (err) {
     reply.code(401).send({ error: 'unauthorized' });
+  }
+});
+
+// Books API
+server.get('/api/books', { preHandler: [server.authenticate] }, async (request) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM books WHERE user_id = $1 ORDER BY created_at DESC',
+      [request.user.id]
+    );
+    return { books: rows };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+server.post('/api/books', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { title, author, totalPages, targetDate } = request.body;
+  if (!title) {
+    return reply.code(400).send({ error: 'title is required' });
+  }
+  
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO books (user_id, title, author, total_pages, target_date) 
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [request.user.id, title, author, totalPages, targetDate]
+    );
+    return { book: rows[0] };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+server.put('/api/books/:id', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  const updates = request.body;
+  
+  try {
+    const { rows } = await pool.query(
+      `UPDATE books SET 
+       title = COALESCE($1, title),
+       author = COALESCE($2, author),
+       total_pages = COALESCE($3, total_pages),
+       target_date = COALESCE($4, target_date),
+       current_page = COALESCE($5, current_page),
+       updated_at = NOW()
+       WHERE id = $6 AND user_id = $7 RETURNING *`,
+      [updates.title, updates.author, updates.totalPages, updates.targetDate, updates.currentPage, id, request.user.id]
+    );
+    
+    if (rows.length === 0) {
+      return reply.code(404).send({ error: 'book not found' });
+    }
+    
+    return { book: rows[0] };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+server.delete('/api/books/:id', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  
+  try {
+    const { rows } = await pool.query(
+      'DELETE FROM books WHERE id = $1 AND user_id = $2 RETURNING id',
+      [id, request.user.id]
+    );
+    
+    if (rows.length === 0) {
+      return reply.code(404).send({ error: 'book not found' });
+    }
+    
+    return { success: true };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+// Reading Records API
+server.get('/api/books/:id/records', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM reading_records WHERE book_id = $1 AND user_id = $2 ORDER BY date DESC',
+      [id, request.user.id]
+    );
+    return { records: rows };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+server.post('/api/books/:id/records', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  const { pagesRead, notes, percentage } = request.body;
+  
+  if (!pagesRead || percentage === undefined) {
+    return reply.code(400).send({ error: 'pagesRead and percentage are required' });
+  }
+  
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO reading_records (book_id, user_id, date, pages_read, notes, percentage) 
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [id, request.user.id, new Date().toISOString().split('T')[0], pagesRead, notes, percentage]
+    );
+    
+    // Update book's current page
+    await pool.query(
+      'UPDATE books SET current_page = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3',
+      [pagesRead, id, request.user.id]
+    );
+    
+    return { record: rows[0] };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+// Complete book
+server.post('/api/books/:id/complete', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  const { finalReview } = request.body;
+  
+  try {
+    const { rows } = await pool.query(
+      `UPDATE books SET 
+       is_completed = TRUE, 
+       completed_at = NOW(), 
+       final_review = $1,
+       updated_at = NOW()
+       WHERE id = $2 AND user_id = $3 RETURNING *`,
+      [finalReview, id, request.user.id]
+    );
+    
+    if (rows.length === 0) {
+      return reply.code(404).send({ error: 'book not found' });
+    }
+    
+    return { book: rows[0] };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+// Wishlist API
+server.get('/api/wishlist', { preHandler: [server.authenticate] }, async (request) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM book_wishlist WHERE user_id = $1 ORDER BY created_at DESC',
+      [request.user.id]
+    );
+    return { wishlist: rows };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+server.post('/api/wishlist', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { title, author, amazonLink, notes } = request.body;
+  
+  if (!title) {
+    return reply.code(400).send({ error: 'title is required' });
+  }
+  
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO book_wishlist (user_id, title, author, amazon_link, notes) 
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [request.user.id, title, author, amazonLink, notes]
+    );
+    return { item: rows[0] };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+server.put('/api/wishlist/:id', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  const updates = request.body;
+  
+  try {
+    const { rows } = await pool.query(
+      `UPDATE book_wishlist SET 
+       title = COALESCE($1, title),
+       author = COALESCE($2, author),
+       amazon_link = COALESCE($3, amazon_link),
+       notes = COALESCE($4, notes),
+       is_checked = COALESCE($5, is_checked)
+       WHERE id = $6 AND user_id = $7 RETURNING *`,
+      [updates.title, updates.author, updates.amazonLink, updates.notes, updates.isChecked, id, request.user.id]
+    );
+    
+    if (rows.length === 0) {
+      return reply.code(404).send({ error: 'item not found' });
+    }
+    
+    return { item: rows[0] };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+server.delete('/api/wishlist/:id', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  
+  try {
+    const { rows } = await pool.query(
+      'DELETE FROM book_wishlist WHERE id = $1 AND user_id = $2 RETURNING id',
+      [id, request.user.id]
+    );
+    
+    if (rows.length === 0) {
+      return reply.code(404).send({ error: 'item not found' });
+    }
+    
+    return { success: true };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
   }
 });
 
