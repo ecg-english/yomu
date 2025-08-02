@@ -478,8 +478,6 @@ export function AppProvider({ children }) {
     }),
   };
 
-  const { user } = useAuth();
-  
   const contextValue = {
     state: { ...state, user },
     actions,
