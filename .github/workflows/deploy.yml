@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
@@ -30,7 +30,7 @@ jobs:
         run: echo '' > dist/.nojekyll
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
@@ -45,4 +45,4 @@ jobs:
       id-token: write
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
