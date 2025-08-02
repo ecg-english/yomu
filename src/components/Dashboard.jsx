@@ -71,7 +71,7 @@ export default function Dashboard() {
         <header className="dashboard-header">
           <div className="user-greeting">
             <div className="greeting-logo">
-              <img src={import.meta.env.BASE_URL + "yomu-logo.png"} alt="読む！" className="dashboard-logo" />
+              <img src={import.meta.env.BASE_URL + "YomuLogo.png"} alt="読む！" className="dashboard-logo" />
             </div>
             <h1>こんにちは、{state.user?.name}さん</h1>
             <p>今日も素敵な読書時間を過ごしましょう</p>
