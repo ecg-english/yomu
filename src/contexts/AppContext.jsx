@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useAuth } from './AuthContext';
 
 const AppContext = createContext();
 
 // 初期状態
 const initialState = {
-  user: null,
   currentBooks: [], // 複数の本を管理
   selectedBookId: null, // 現在選択中の本
   completedBooks: [],
@@ -21,7 +21,6 @@ const initialState = {
 
 // アクションタイプ
 const ActionTypes = {
-  SET_USER: 'SET_USER',
   ADD_BOOK: 'ADD_BOOK',
   UPDATE_BOOK: 'UPDATE_BOOK',
   REMOVE_BOOK: 'REMOVE_BOOK',
@@ -43,9 +42,6 @@ const ActionTypes = {
 // リデューサー
 function appReducer(state, action) {
   switch (action.type) {
-    case ActionTypes.SET_USER:
-      return { ...state, user: action.payload };
-    
     case ActionTypes.ADD_BOOK:
       const newBook = {
         id: Date.now(),
@@ -273,8 +269,6 @@ export function AppProvider({ children }) {
 
   // アクションクリエイター
   const actions = {
-    setUser: (user) => dispatch({ type: ActionTypes.SET_USER, payload: user }),
-    
     addBook: (book) => dispatch({ type: ActionTypes.ADD_BOOK, payload: book }),
     
     updateBook: (id, updates) => dispatch({ 
@@ -327,8 +321,10 @@ export function AppProvider({ children }) {
     }),
   };
 
+  const { user } = useAuth();
+  
   const contextValue = {
-    state,
+    state: { ...state, user },
     actions,
     getSelectedBook,
     getAllReadingHistory,

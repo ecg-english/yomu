@@ -1,10 +1,12 @@
 import React from 'react';
-import { BookOpen, Calendar, Target, TrendingUp, Award, Plus, Eye } from 'lucide-react';
+import { BookOpen, Calendar, Target, TrendingUp, Award, Plus, Eye, LogOut } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../contexts/AuthContext';
 import './Dashboard.css';
 
 export default function Dashboard() {
   const { state, actions, getSelectedBook, getAllReadingHistory } = useApp();
+  const { logout } = useAuth();
   const { currentBooks, completedBooks } = state;
   const selectedBook = getSelectedBook();
   const allReadingHistory = getAllReadingHistory();
@@ -72,12 +74,22 @@ export default function Dashboard() {
             <p>今日も素敵な読書時間を過ごしましょう</p>
           </div>
           
-          <div className="completed-books-counter" onClick={() => {}}>
-            <Award className="counter-icon" size={20} />
-            <div className="counter-content">
-              <span className="counter-number">{completedBooks.length}</span>
-              <span className="counter-label">冊読了</span>
+          <div className="header-actions">
+            <div className="completed-books-counter" onClick={() => {}}>
+              <Award className="counter-icon" size={20} />
+              <div className="counter-content">
+                <span className="counter-number">{completedBooks.length}</span>
+                <span className="counter-label">冊読了</span>
+              </div>
             </div>
+            
+            <button 
+              className="btn btn-secondary logout-btn" 
+              onClick={logout}
+              title="ログアウト"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </header>
 
