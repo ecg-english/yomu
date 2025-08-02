@@ -203,6 +203,11 @@
   min-width: 200px;
 }
 
+.book-selector-wrapper {
+  display: flex;
+  align-items: center;
+}
+
 .book-selector:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -590,7 +595,21 @@
     gap: var(--space-sm);
   }
   
-
+  .book-header {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: stretch;
+  }
+  
+  .book-selector {
+    min-width: auto;
+    width: 100%;
+    font-size: var(--font-size-sm);
+  }
+  
+  .book-selector-wrapper {
+    width: 100%;
+  }
   
   .progress-section {
     gap: var(--space-md);
@@ -613,9 +632,22 @@
   
   .book-title {
     font-size: var(--font-size-lg);
+    word-break: break-word;
+    hyphens: auto;
   }
   
-
+  .book-author {
+    font-size: var(--font-size-xs);
+  }
+  
+  .book-selector {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs) var(--space-sm);
+  }
+  
+  .book-selector-wrapper {
+    width: 100%;
+  }
   
   .progress-circle {
     width: 100px;
@@ -624,5 +656,14 @@
   
   .progress-percentage {
     font-size: var(--font-size-xl);
+  }
+  
+  .progress-details {
+    gap: var(--space-xs);
+  }
+  
+  .detail-item {
+    font-size: var(--font-size-xs);
+    gap: var(--space-xs);
   }
 } 

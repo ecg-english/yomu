@@ -129,17 +129,19 @@ export default function Dashboard() {
                       )}
                     </div>
                     {currentBooks.length > 1 && (
-                      <select 
-                        className="book-selector"
-                        value={selectedBook.id}
-                        onChange={(e) => actions.selectBook(parseInt(e.target.value))}
-                      >
-                        {currentBooks.map(book => (
-                          <option key={book.id} value={book.id}>
-                            {book.title}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="book-selector-wrapper">
+                        <select 
+                          className="book-selector"
+                          value={selectedBook.id}
+                          onChange={(e) => actions.selectBook(parseInt(e.target.value))}
+                        >
+                          {currentBooks.map(book => (
+                            <option key={book.id} value={book.id}>
+                              {book.title.length > 20 ? book.title.substring(0, 20) + '...' : book.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     )}
                   </div>
 
