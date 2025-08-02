@@ -56,10 +56,27 @@ function appReducer(state, action) {
     
     case ActionTypes.LOAD_BOOKS:
       const { books, completedBooks } = action.payload;
+      
+      // バックエンドデータをフロントエンド形式に変換
+      const convertBook = (book) => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        totalPages: book.total_pages,
+        targetDate: book.target_date,
+        startedAt: book.started_at,
+        currentPage: book.current_page,
+        readingHistory: [], // 初期化（後でAPIから取得）
+      });
+      
+      const currentBooks = books.filter(book => !book.is_completed).map(convertBook);
+      const completedBooksList = (completedBooks || books.filter(book => book.is_completed)).map(convertBook);
+      
       return {
         ...state,
-        currentBooks: books.filter(book => !book.is_completed),
-        completedBooks: completedBooks || books.filter(book => book.is_completed),
+        currentBooks,
+        completedBooks: completedBooksList,
+        selectedBookId: currentBooks.length > 0 ? currentBooks[0].id : null,
         isLoading: false,
         error: null,
       };
@@ -169,9 +186,19 @@ function appReducer(state, action) {
       };
     
     case ActionTypes.LOAD_WISHLIST:
+      // バックエンドデータをフロントエンド形式に変換
+      const convertWishlistItem = (item) => ({
+        id: item.id,
+        title: item.title,
+        author: item.author,
+        amazonLink: item.amazon_link,
+        notes: item.notes,
+        isCompleted: item.is_checked,
+      });
+      
       return {
         ...state,
-        bookWishlist: action.payload,
+        bookWishlist: action.payload.map(convertWishlistItem),
         isLoading: false,
       };
     
@@ -305,26 +332,30 @@ export function AppProvider({ children }) {
     
     // 現在読書中の本の記録
     state.currentBooks.forEach(book => {
-      book.readingHistory.forEach(record => {
-        allRecords.push({
-          ...record,
-          bookId: book.id,
-          bookTitle: book.title,
-          isCompleted: false,
+      if (book.readingHistory && Array.isArray(book.readingHistory)) {
+        book.readingHistory.forEach(record => {
+          allRecords.push({
+            ...record,
+            bookId: book.id,
+            bookTitle: book.title,
+            isCompleted: false,
+          });
         });
-      });
+      }
     });
     
     // 読了済みの本の記録
     state.completedBooks.forEach(book => {
-      book.readingHistory.forEach(record => {
-        allRecords.push({
-          ...record,
-          bookId: book.id,
-          bookTitle: book.title,
-          isCompleted: true,
+      if (book.readingHistory && Array.isArray(book.readingHistory)) {
+        book.readingHistory.forEach(record => {
+          allRecords.push({
+            ...record,
+            bookId: book.id,
+            bookTitle: book.title,
+            isCompleted: true,
+          });
         });
-      });
+      }
     });
     
     return allRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
