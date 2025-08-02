@@ -78,32 +78,16 @@
 /* レスポンシブ対応 */
 @media (max-width: 480px) {
   .tab-label {
-    font-size: 0.65rem;
-  }
-  
-  .tab-icon {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .tab-button {
-    gap: 2px;
-    padding: var(--space-xs);
-  }
-}
-
-/* iPhone SE などの小さな画面対応 */
-@media (max-width: 375px) {
-  .tab-label {
     display: none;
-  }
-  
-  .tab-button {
-    gap: 0;
   }
   
   .tab-icon {
     width: 22px;
     height: 22px;
+  }
+  
+  .tab-button {
+    gap: 0;
+    padding: var(--space-xs);
   }
 } 

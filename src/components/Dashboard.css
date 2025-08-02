@@ -29,6 +29,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-text-primary);
+}
+
+.logout-btn svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
 }
 
 .user-greeting h1 {
