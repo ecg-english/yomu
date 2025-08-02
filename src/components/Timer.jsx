@@ -156,7 +156,7 @@ export default function Timer() {
         <header className="timer-header">
           <div className="timer-title">
             <TimerIcon className="timer-icon" size={24} />
-            <h1>読書タイマー</h1>
+            <h1>読む！タイマー</h1>
           </div>
           
           {currentBooks.length > 0 && (

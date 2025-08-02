@@ -56,7 +56,7 @@ export default function AuthScreen() {
           <div className="icon-wrapper">
             <User className="auth-icon" size={48} />
           </div>
-          <h1 className="auth-title">読書カレンダーへようこそ</h1>
+          <h1 className="auth-title">読む！へようこそ</h1>
           <p className="auth-subtitle">
             {isLoginMode 
               ? 'アカウントにログインして読書を続けましょう'

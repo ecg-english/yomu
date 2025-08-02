@@ -77,7 +77,7 @@ export default function BookRegistration({ isModal = false }) {
               <BookOpen className="book-icon" size={40} />
             </div>
             <h1 className="book-registration-title">
-              {isFirstBook ? '最初の一冊を登録しましょう' : '新しい本を追加'}
+              {isFirstBook ? '読む！で最初の一冊を登録しましょう' : '新しい本を追加'}
             </h1>
             <p className="book-registration-subtitle">
               {isFirstBook 

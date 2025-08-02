@@ -145,7 +145,7 @@ export default function Calendar() {
         <header className="calendar-header">
           <div className="calendar-title">
             <BookOpen className="calendar-icon" size={24} />
-            <h1>読書カレンダー</h1>
+            <h1>読む！カレンダー</h1>
           </div>
           
           <div className="calendar-stats">

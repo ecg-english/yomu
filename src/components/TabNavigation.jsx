@@ -5,9 +5,9 @@ import './TabNavigation.css';
 
 const tabs = [
   { id: 'dashboard', label: 'ダッシュボード', icon: Home },
-  { id: 'calendar', label: '読書カレンダー', icon: Calendar },
-  { id: 'timer', label: '読書タイマー', icon: Timer },
-  { id: 'wishlist', label: '気になる本', icon: BookOpen },
+  { id: 'calendar', label: '読む！カレンダー', icon: Calendar },
+  { id: 'timer', label: '読む！タイマー', icon: Timer },
+  { id: 'wishlist', label: '読む！ウィッシュリスト', icon: BookOpen },
 ];
 
 export default function TabNavigation() {

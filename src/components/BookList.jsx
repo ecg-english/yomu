@@ -89,7 +89,7 @@ export default function BookList() {
         <header className="book-list-header">
           <div className="book-list-title">
             <BookOpen className="book-list-icon" size={24} />
-            <h1>気になる本リスト</h1>
+            <h1>読む！ウィッシュリスト</h1>
           </div>
           
           <button
