@@ -402,18 +402,23 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
     
     // 動画の説明文とタイトルから要約を生成
     const prompt = `
-    以下のYouTube動画の情報を基に、読書に活かせる要約を作成してください。
-    
-    動画URL: ${videoUrl}
-    動画タイトル: ${videoTitle || 'タイトルなし'}
-    動画説明: ${videoDescription || '説明なし'}
-    
-    要約のポイント:
-    1. 動画の主要な内容（2-3行）
-    2. 読書に活かせる学習ポイント（2-3行）
-    3. 読書の理解を深める要素（1-2行）
-    
-    簡潔で分かりやすい要約をお願いします。日本語で回答してください。
+以下のYouTube動画の情報を基に、読書に活かせる要約を作成してください。
+
+動画URL: ${videoUrl}
+動画タイトル: ${videoTitle || 'タイトルなし'}
+動画説明: ${videoDescription || '説明なし'}
+
+要約のポイント:
+1. 動画の主要な内容（2-3行）
+2. 読書に活かせる学習ポイント（2-3行）
+3. 読書の理解を深める要素（1-2行）
+
+要求事項:
+- 800字以内で要約してください
+- 各ポイントの間に改行を入れて読みやすくしてください
+- 番号付きリスト形式で整理してください
+- 途中で途切れないように、適切な長さでまとめてください
+- 日本語で回答してください
     `;
     
     server.log.info('Sending prompt to OpenAI API');
@@ -423,7 +428,7 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
-        max_tokens: 200,
+        max_tokens: 1000,
       });
       const summary = result.choices[0].message.content;
       
