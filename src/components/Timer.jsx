@@ -14,6 +14,49 @@ export default function Timer() {
 
   const selectedBook = getSelectedBook();
 
+  // バックグラウンドタイマー機能
+  useEffect(() => {
+    const checkBackgroundTimer = () => {
+      const savedTimerData = localStorage.getItem('yomuTimerData');
+      if (savedTimerData) {
+        const timerData = JSON.parse(savedTimerData);
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - timerData.startTime) / 1000);
+        
+        if (timerData.mode === 'timer') {
+          const remainingSeconds = Math.max(0, timerData.duration - elapsedSeconds);
+          
+          if (remainingSeconds <= 0) {
+            // タイマー終了
+            localStorage.removeItem('yomuTimerData');
+            setShowEndOptions(true);
+            actions.stopTimer();
+          } else {
+            // タイマーを更新
+            actions.updateTimer(remainingSeconds);
+            if (!isTimerRunning) {
+              actions.startTimer('timer', remainingSeconds);
+            }
+          }
+        } else if (timerData.mode === 'stopwatch') {
+          // ストップウォッチを更新
+          actions.updateTimer(elapsedSeconds);
+          if (!isTimerRunning) {
+            actions.startTimer('stopwatch', elapsedSeconds);
+          }
+        }
+      }
+    };
+
+    // ページ読み込み時にチェック
+    checkBackgroundTimer();
+
+    // 定期的にチェック（1秒間隔）
+    const interval = setInterval(checkBackgroundTimer, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isTimerRunning, actions]);
+
   // タイマー選択肢（分）
   const timerOptions = [
     { label: '5分', minutes: 5 },
@@ -33,7 +76,7 @@ export default function Timer() {
     { label: 'なし', minutes: 'none' }
   ];
 
-  // タイマーの更新
+  // タイマーの更新（リアルタイム表示用）
   useEffect(() => {
     let interval;
     
@@ -47,6 +90,7 @@ export default function Timer() {
             // タイマー終了
             setShowEndOptions(true);
             actions.stopTimer();
+            localStorage.removeItem('yomuTimerData');
           }
         } else if (timerMode === 'stopwatch') {
           // ストップウォッチ
@@ -76,11 +120,25 @@ export default function Timer() {
 
     if (selectedDuration === 'stopwatch') {
       actions.startTimer('stopwatch', 0);
+      // バックグラウンドタイマーデータを保存
+      const timerData = {
+        mode: 'stopwatch',
+        startTime: Date.now(),
+        duration: 0
+      };
+      localStorage.setItem('yomuTimerData', JSON.stringify(timerData));
     } else if (selectedDuration === 'none') {
       setShowProgressForm(true);
     } else {
       const durationInSeconds = selectedDuration * 60;
       actions.startTimer('timer', durationInSeconds);
+      // バックグラウンドタイマーデータを保存
+      const timerData = {
+        mode: 'timer',
+        startTime: Date.now(),
+        duration: durationInSeconds
+      };
+      localStorage.setItem('yomuTimerData', JSON.stringify(timerData));
     }
   };
 
@@ -88,11 +146,26 @@ export default function Timer() {
   const toggleTimer = () => {
     if (isTimerRunning) {
       actions.stopTimer();
+      localStorage.removeItem('yomuTimerData'); // 一時停止時はバックグラウンドタイマーをリセット
     } else {
       if (timerMode === 'timer') {
         actions.startTimer('timer', timerSeconds);
+        // 再開時にバックグラウンドタイマーデータを更新
+        const timerData = {
+          mode: 'timer',
+          startTime: Date.now() - (timerDuration - timerSeconds) * 1000,
+          duration: timerDuration
+        };
+        localStorage.setItem('yomuTimerData', JSON.stringify(timerData));
       } else if (timerMode === 'stopwatch') {
         actions.startTimer('stopwatch', timerSeconds);
+        // 再開時にバックグラウンドタイマーデータを更新
+        const timerData = {
+          mode: 'stopwatch',
+          startTime: Date.now() - timerSeconds * 1000,
+          duration: 0
+        };
+        localStorage.setItem('yomuTimerData', JSON.stringify(timerData));
       }
     }
   };
@@ -103,6 +176,7 @@ export default function Timer() {
     setSelectedDuration(null);
     setShowEndOptions(false);
     setSelectedBookForReading(null);
+    localStorage.removeItem('yomuTimerData'); // リセット時はバックグラウンドタイマーをリセット
   };
 
   // 終了選択肢のハンドリング
