@@ -39,15 +39,15 @@ export default function VideoRecommendations({ bookId }) {
       // 動画情報を整形
       const formattedVideos = data.videos?.map(video => ({
         id: video.id,
-        title: video.snippet?.title || 'タイトルなし',
-        description: video.snippet?.description || '',
-        thumbnail: video.snippet?.thumbnails?.medium?.url || '',
-        channelTitle: video.snippet?.channelTitle || 'チャンネル名なし',
-        publishedAt: video.snippet?.publishedAt || '',
-        viewCount: video.statistics?.viewCount || 0,
-        likeCount: video.statistics?.likeCount || 0,
-        duration: video.snippet?.duration || '',
-        url: `https://www.youtube.com/watch?v=${video.id}`
+        title: video.title || 'タイトルなし',
+        description: video.description || '',
+        thumbnail: video.thumbnail || '',
+        channelTitle: video.channelTitle || 'チャンネル名なし',
+        publishedAt: video.publishedAt || '',
+        viewCount: parseInt(video.viewCount) || 0,
+        likeCount: parseInt(video.likeCount) || 0,
+        duration: video.duration || '',
+        url: video.url || `https://www.youtube.com/watch?v=${video.id}`
       })) || [];
       
       console.log('YouTube API Response:', data);
