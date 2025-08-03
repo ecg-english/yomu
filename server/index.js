@@ -334,7 +334,12 @@ server.get('/api/books/:id/videos', { preHandler: [server.authenticate] }, async
     const videos = response.data.items || [];
     
     // 動画の詳細情報を取得
-    const videoIds = videos.map(video => video.id.videoId);
+    const videoIds = videos.map(video => video.id?.videoId).filter(Boolean);
+    
+    if (videoIds.length === 0) {
+      return { videos: [] };
+    }
+    
     const videoDetailsResponse = await youtube.videos.list({
       part: 'snippet,statistics',
       id: videoIds.join(',')
@@ -345,14 +350,14 @@ server.get('/api/books/:id/videos', { preHandler: [server.authenticate] }, async
     // 動画情報を整形
     const formattedVideos = videoDetails.map(video => ({
       id: video.id,
-      title: video.snippet.title,
-      description: video.snippet.description,
-      thumbnail: video.snippet.thumbnails.medium.url,
-      channelTitle: video.snippet.channelTitle,
-      publishedAt: video.snippet.publishedAt,
+      title: video.snippet?.title || 'タイトルなし',
+      description: video.snippet?.description || '',
+      thumbnail: video.snippet?.thumbnails?.medium?.url || '',
+      channelTitle: video.snippet?.channelTitle || 'チャンネル名なし',
+      publishedAt: video.snippet?.publishedAt || '',
       viewCount: video.statistics?.viewCount || 0,
       likeCount: video.statistics?.likeCount || 0,
-      duration: video.snippet.duration,
+      duration: video.snippet?.duration || '',
       url: `https://www.youtube.com/watch?v=${video.id}`
     }));
     

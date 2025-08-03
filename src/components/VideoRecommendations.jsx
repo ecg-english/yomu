@@ -38,7 +38,20 @@ export default function VideoRecommendations({ bookId }) {
       }
 
       const data = await response.json();
-      setVideos(data.videos || []);
+      // 動画情報を整形
+      const formattedVideos = data.videos?.map(video => ({
+        id: video.id,
+        title: video.snippet?.title || 'タイトルなし',
+        description: video.snippet?.description || '',
+        thumbnail: video.snippet?.thumbnails?.medium?.url || '',
+        channelTitle: video.snippet?.channelTitle || 'チャンネル名なし',
+        publishedAt: video.snippet?.publishedAt || '',
+        viewCount: video.statistics?.viewCount || 0,
+        likeCount: video.statistics?.likeCount || 0,
+        duration: video.snippet?.duration || '',
+        url: `https://www.youtube.com/watch?v=${video.id}`
+      })) || [];
+      setVideos(formattedVideos);
     } catch (err) {
       setError(err.message);
       console.error('Failed to load videos:', err);
@@ -85,6 +98,9 @@ export default function VideoRecommendations({ bookId }) {
   };
 
   const formatDuration = (duration) => {
+    // durationがundefinedやnullの場合は'0:00'を返す
+    if (!duration) return '0:00';
+    
     // ISO 8601 duration format (PT4M13S) を MM:SS 形式に変換
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
     if (!match) return '0:00';
