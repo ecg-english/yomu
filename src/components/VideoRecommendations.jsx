@@ -49,6 +49,10 @@ export default function VideoRecommendations({ bookId }) {
         duration: video.snippet?.duration || '',
         url: `https://www.youtube.com/watch?v=${video.id}`
       })) || [];
+      
+      console.log('YouTube API Response:', data);
+      console.log('Formatted Videos:', formattedVideos);
+      
       setVideos(formattedVideos);
     } catch (err) {
       setError(err.message);
@@ -58,7 +62,7 @@ export default function VideoRecommendations({ bookId }) {
     }
   };
 
-  const getVideoSummary = async (videoId, videoUrl) => {
+  const getVideoSummary = async (videoId, videoUrl, videoTitle, videoDescription) => {
     setSummaryLoading(true);
     setSelectedVideo(videoId);
     
@@ -69,7 +73,11 @@ export default function VideoRecommendations({ bookId }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ videoUrl }),
+        body: JSON.stringify({ 
+          videoUrl, 
+          videoTitle, 
+          videoDescription 
+        }),
       });
 
       if (!response.ok) {
@@ -206,7 +214,7 @@ export default function VideoRecommendations({ bookId }) {
               <div className="video-actions">
                 <button
                   className="btn btn-secondary btn-sm"
-                  onClick={() => getVideoSummary(video.id, video.url)}
+                  onClick={() => getVideoSummary(video.id, video.url, video.title, video.description)}
                   disabled={summaryLoading && selectedVideo === video.id}
                 >
                   {summaryLoading && selectedVideo === video.id ? '要約中...' : '要約を見る'}

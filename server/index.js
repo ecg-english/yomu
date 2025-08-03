@@ -355,8 +355,8 @@ server.get('/api/books/:id/videos', { preHandler: [server.authenticate] }, async
       thumbnail: video.snippet?.thumbnails?.medium?.url || '',
       channelTitle: video.snippet?.channelTitle || 'チャンネル名なし',
       publishedAt: video.snippet?.publishedAt || '',
-      viewCount: video.statistics?.viewCount || 0,
-      likeCount: video.statistics?.likeCount || 0,
+      viewCount: parseInt(video.statistics?.viewCount) || 0,
+      likeCount: parseInt(video.statistics?.likeCount) || 0,
       duration: video.snippet?.duration || '',
       url: `https://www.youtube.com/watch?v=${video.id}`
     }));
@@ -368,26 +368,29 @@ server.get('/api/books/:id/videos', { preHandler: [server.authenticate] }, async
   }
 });
 
-// Video Summary API (Google Notebook LM)
+// Video Summary API (Google AI SDK)
 server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, async (request, reply) => {
   const { id } = request.params;
-  const { videoUrl } = request.body;
+  const { videoUrl, videoTitle, videoDescription } = request.body;
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     
-    // 動画の説明文を取得（実際の実装では動画の字幕や説明文を使用）
+    // 動画の説明文とタイトルから要約を生成
     const prompt = `
-    以下のYouTube動画の内容を日本語で要約してください。
+    以下のYouTube動画の情報を基に、読書に活かせる要約を作成してください。
+    
     動画URL: ${videoUrl}
+    動画タイトル: ${videoTitle || 'タイトルなし'}
+    動画説明: ${videoDescription || '説明なし'}
     
     要約のポイント:
-    1. 動画の主要な内容
-    2. 学習できるポイント
-    3. 読書に活かせる要素
+    1. 動画の主要な内容（2-3行）
+    2. 読書に活かせる学習ポイント（2-3行）
+    3. 読書の理解を深める要素（1-2行）
     
-    簡潔で分かりやすい要約をお願いします。
+    簡潔で分かりやすい要約をお願いします。日本語で回答してください。
     `;
     
     const result = await model.generateContent(prompt);
