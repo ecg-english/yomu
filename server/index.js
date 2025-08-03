@@ -385,6 +385,8 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     
+    server.log.info('Google AI API initialized successfully');
+    
     // 動画の説明文とタイトルから要約を生成
     const prompt = `
     以下のYouTube動画の情報を基に、読書に活かせる要約を作成してください。
@@ -401,12 +403,21 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
     簡潔で分かりやすい要約をお願いします。日本語で回答してください。
     `;
     
+    server.log.info('Sending prompt to Google AI API');
     const result = await model.generateContent(prompt);
     const summary = result.response.text();
     
+    server.log.info('Google AI API response received successfully');
     return { summary };
   } catch (err) {
     server.log.error('Google AI API Error:', err);
+    server.log.error('Error details:', {
+      message: err.message,
+      stack: err.stack,
+      apiKey: process.env.GOOGLE_AI_API_KEY ? 'Set' : 'Not set',
+      videoTitle: videoTitle,
+      videoDescription: videoDescription ? 'Has description' : 'No description'
+    });
     
     // フォールバック要約を返す
     const fallbackSummary = `
