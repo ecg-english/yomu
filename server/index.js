@@ -1,10 +1,13 @@
 import Fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
-import pkg from 'pg';
+import pg from 'pg';
 import bcrypt from 'bcryptjs';
+import { google } from 'googleapis';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import fetch from 'node-fetch';
 
-const { Pool } = pkg;
+const { Pool } = pg;
 
 const server = Fastify({ logger: true });
 
@@ -287,6 +290,105 @@ server.get('/api/wishlist', { preHandler: [server.authenticate] }, async (reques
       [request.user.id]
     );
     return { wishlist: rows };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+// YouTube Video Recommendations API
+server.get('/api/books/:id/videos', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  
+  try {
+    // 本の情報を取得
+    const { rows: books } = await pool.query(
+      'SELECT * FROM books WHERE id = $1 AND user_id = $2',
+      [id, request.user.id]
+    );
+    
+    if (books.length === 0) {
+      return reply.code(404).send({ error: 'book not found' });
+    }
+    
+    const book = books[0];
+    
+    // YouTube Data API v3を使用して動画を検索
+    const youtube = google.youtube({
+      version: 'v3',
+      auth: process.env.YOUTUBE_API_KEY
+    });
+    
+    // 検索クエリを作成（本のタイトル + 著者）
+    const searchQuery = `${book.title} ${book.author || ''} 解説 レビュー 要約`;
+    
+    const response = await youtube.search.list({
+      part: 'snippet',
+      q: searchQuery,
+      type: 'video',
+      maxResults: 10,
+      relevanceLanguage: 'ja',
+      regionCode: 'JP'
+    });
+    
+    const videos = response.data.items || [];
+    
+    // 動画の詳細情報を取得
+    const videoIds = videos.map(video => video.id.videoId);
+    const videoDetailsResponse = await youtube.videos.list({
+      part: 'snippet,statistics',
+      id: videoIds.join(',')
+    });
+    
+    const videoDetails = videoDetailsResponse.data.items || [];
+    
+    // 動画情報を整形
+    const formattedVideos = videoDetails.map(video => ({
+      id: video.id,
+      title: video.snippet.title,
+      description: video.snippet.description,
+      thumbnail: video.snippet.thumbnails.medium.url,
+      channelTitle: video.snippet.channelTitle,
+      publishedAt: video.snippet.publishedAt,
+      viewCount: video.statistics?.viewCount || 0,
+      likeCount: video.statistics?.likeCount || 0,
+      duration: video.snippet.duration,
+      url: `https://www.youtube.com/watch?v=${video.id}`
+    }));
+    
+    return { videos: formattedVideos };
+  } catch (err) {
+    server.log.error(err);
+    return reply.code(500).send({ error: 'server error' });
+  }
+});
+
+// Video Summary API (Google Notebook LM)
+server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, async (request, reply) => {
+  const { id } = request.params;
+  const { videoUrl } = request.body;
+  
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    
+    // 動画の説明文を取得（実際の実装では動画の字幕や説明文を使用）
+    const prompt = `
+    以下のYouTube動画の内容を日本語で要約してください。
+    動画URL: ${videoUrl}
+    
+    要約のポイント:
+    1. 動画の主要な内容
+    2. 学習できるポイント
+    3. 読書に活かせる要素
+    
+    簡潔で分かりやすい要約をお願いします。
+    `;
+    
+    const result = await model.generateContent(prompt);
+    const summary = result.response.text();
+    
+    return { summary };
   } catch (err) {
     server.log.error(err);
     return reply.code(500).send({ error: 'server error' });

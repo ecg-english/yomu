@@ -1,7 +1,8 @@
 import React from 'react';
-import { BookOpen, Calendar, Target, TrendingUp, Award, Plus, Eye, LogOut } from 'lucide-react';
+import { BookOpen, Calendar, Target, TrendingUp, Award, Plus, Eye, LogOut, Play } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
+import VideoRecommendations from './VideoRecommendations';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -240,6 +241,13 @@ export default function Dashboard() {
             </>
           )}
         </div>
+
+        {/* 動画推薦セクション */}
+        {selectedBook && (
+          <div className="video-recommendations-section">
+            <VideoRecommendations bookId={selectedBook.id} />
+          </div>
+        )}
 
         {/* 統計セクション */}
         <div className="stats-section">
