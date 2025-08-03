@@ -20,6 +20,21 @@
   font-size: var(--font-size-sm);
 }
 
+.search-videos-container {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-xl);
+}
+
+.search-videos-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;

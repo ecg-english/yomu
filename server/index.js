@@ -326,7 +326,7 @@ server.get('/api/books/:id/videos', { preHandler: [server.authenticate] }, async
       part: 'snippet',
       q: searchQuery,
       type: 'video',
-      maxResults: 10,
+      maxResults: 3,
       relevanceLanguage: 'ja',
       regionCode: 'JP'
     });

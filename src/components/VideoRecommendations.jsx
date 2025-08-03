@@ -13,6 +13,7 @@ export default function VideoRecommendations({ bookId }) {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [summary, setSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const API_BASE = 'https://yomu-api.onrender.com';
 
@@ -25,6 +26,7 @@ export default function VideoRecommendations({ bookId }) {
   const loadVideos = async () => {
     setLoading(true);
     setError(null);
+    setHasSearched(true);
     
     try {
       const response = await fetch(`${API_BASE}/api/books/${bookId}/videos`, {
@@ -139,13 +141,34 @@ export default function VideoRecommendations({ bookId }) {
     );
   }
 
-  if (videos.length === 0) {
+  if (!hasSearched) {
+    return (
+      <div className="video-recommendations">
+        <div className="video-recommendations-header">
+          <h2>関連動画</h2>
+          <p>この本に関連するYouTube動画をおすすめします</p>
+        </div>
+        
+        <div className="search-videos-container">
+          <button className="btn btn-primary search-videos-btn" onClick={loadVideos}>
+            <Play size={20} />
+            関連動画を探す
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (videos.length === 0 && hasSearched) {
     return (
       <div className="video-recommendations">
         <div className="no-videos">
           <MessageSquare className="no-videos-icon" size={48} />
           <h3>関連動画が見つかりませんでした</h3>
           <p>この本に関連する動画が現在見つかりません。後でもう一度お試しください。</p>
+          <button className="btn btn-secondary" onClick={loadVideos}>
+            再検索
+          </button>
         </div>
       </div>
     );
