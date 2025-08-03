@@ -381,6 +381,18 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
     });
   }
   
+  // APIキーの形式を確認
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey.startsWith('AIza')) {
+    server.log.error('Invalid Google AI API key format');
+    return reply.code(500).send({ 
+      error: 'Google AI APIキーの形式が正しくありません',
+      summary: 'APIキーの形式が正しくないため、要約を生成できません。'
+    });
+  }
+  
+  server.log.info('Google AI API key format is valid');
+  
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
@@ -404,11 +416,17 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
     `;
     
     server.log.info('Sending prompt to Google AI API');
-    const result = await model.generateContent(prompt);
-    const summary = result.response.text();
     
-    server.log.info('Google AI API response received successfully');
-    return { summary };
+    try {
+      const result = await model.generateContent(prompt);
+      const summary = result.response.text();
+      
+      server.log.info('Google AI API response received successfully');
+      return { summary };
+    } catch (apiError) {
+      server.log.error('Google AI API call failed:', apiError);
+      throw apiError;
+    }
   } catch (err) {
     server.log.error('Google AI API Error:', err);
     server.log.error('Error details:', {
@@ -418,6 +436,23 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
       videoTitle: videoTitle,
       videoDescription: videoDescription ? 'Has description' : 'No description'
     });
+    
+    // より詳細なエラー情報をログに出力
+    if (err.response) {
+      server.log.error('API Response Error:', {
+        status: err.response.status,
+        statusText: err.response.statusText,
+        data: err.response.data
+      });
+    }
+    
+    if (err.code) {
+      server.log.error('Error Code:', err.code);
+    }
+    
+    if (err.name) {
+      server.log.error('Error Name:', err.name);
+    }
     
     // フォールバック要約を返す
     const fallbackSummary = `
