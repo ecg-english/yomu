@@ -4,7 +4,7 @@ import fastifyJwt from '@fastify/jwt';
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
 import { google } from 'googleapis';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 import fetch from 'node-fetch';
 
 const { Pool } = pg;
@@ -373,31 +373,32 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
   const { id } = request.params;
   const { videoUrl, videoTitle, videoDescription } = request.body;
   
-  // Google AI APIキーの確認
-  if (!process.env.GOOGLE_AI_API_KEY) {
+  // OpenAI APIキーの確認
+  if (!process.env.OPENAI_API_KEY) {
     return reply.code(500).send({ 
-      error: 'Google AI APIキーが設定されていません',
+      error: 'OpenAI APIキーが設定されていません',
       summary: 'APIキーが設定されていないため、要約を生成できません。'
     });
   }
   
   // APIキーの形式を確認
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey.startsWith('AIza')) {
-    server.log.error('Invalid Google AI API key format');
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey.startsWith('sk-')) {
+    server.log.error('Invalid OpenAI API key format');
     return reply.code(500).send({ 
-      error: 'Google AI APIキーの形式が正しくありません',
+      error: 'OpenAI APIキーの形式が正しくありません',
       summary: 'APIキーの形式が正しくないため、要約を生成できません。'
     });
   }
   
-  server.log.info('Google AI API key format is valid');
+  server.log.info('OpenAI API key format is valid');
   
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
     
-    server.log.info('Google AI API initialized successfully');
+    server.log.info('OpenAI API initialized successfully');
     
     // 動画の説明文とタイトルから要約を生成
     const prompt = `
@@ -415,24 +416,29 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
     簡潔で分かりやすい要約をお願いします。日本語で回答してください。
     `;
     
-    server.log.info('Sending prompt to Google AI API');
+    server.log.info('Sending prompt to OpenAI API');
     
     try {
-      const result = await model.generateContent(prompt);
-      const summary = result.response.text();
+      const result = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 200,
+      });
+      const summary = result.choices[0].message.content;
       
-      server.log.info('Google AI API response received successfully');
+      server.log.info('OpenAI API response received successfully');
       return { summary };
     } catch (apiError) {
-      server.log.error('Google AI API call failed:', apiError);
+      server.log.error('OpenAI API call failed:', apiError);
       throw apiError;
     }
   } catch (err) {
-    server.log.error('Google AI API Error:', err);
+    server.log.error('OpenAI API Error:', err);
     server.log.error('Error details:', {
       message: err.message,
       stack: err.stack,
-      apiKey: process.env.GOOGLE_AI_API_KEY ? 'Set' : 'Not set',
+      apiKey: process.env.OPENAI_API_KEY ? 'Set' : 'Not set',
       videoTitle: videoTitle,
       videoDescription: videoDescription ? 'Has description' : 'No description'
     });
