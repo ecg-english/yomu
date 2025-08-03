@@ -65,6 +65,7 @@ export default function VideoRecommendations({ bookId }) {
   const getVideoSummary = async (videoId, videoUrl, videoTitle, videoDescription) => {
     setSummaryLoading(true);
     setSelectedVideo(videoId);
+    setError(null);
     
     try {
       const response = await fetch(`${API_BASE}/api/videos/${videoId}/summary`, {
@@ -80,12 +81,21 @@ export default function VideoRecommendations({ bookId }) {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('要約の取得に失敗しました');
-      }
-
       const data = await response.json();
-      setSummary(data.summary);
+      
+      if (!response.ok) {
+        // エラーでもフォールバック要約がある場合は表示
+        if (data.summary) {
+          setSummary(data.summary);
+          if (data.error) {
+            console.warn('AI要約エラー（フォールバック要約を表示）:', data.error);
+          }
+        } else {
+          throw new Error(data.error || '要約の取得に失敗しました');
+        }
+      } else {
+        setSummary(data.summary);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Failed to get video summary:', err);

@@ -373,6 +373,14 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
   const { id } = request.params;
   const { videoUrl, videoTitle, videoDescription } = request.body;
   
+  // Google AI APIキーの確認
+  if (!process.env.GOOGLE_AI_API_KEY) {
+    return reply.code(500).send({ 
+      error: 'Google AI APIキーが設定されていません',
+      summary: 'APIキーが設定されていないため、要約を生成できません。'
+    });
+  }
+  
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
@@ -398,8 +406,24 @@ server.post('/api/videos/:id/summary', { preHandler: [server.authenticate] }, as
     
     return { summary };
   } catch (err) {
-    server.log.error(err);
-    return reply.code(500).send({ error: 'server error' });
+    server.log.error('Google AI API Error:', err);
+    
+    // フォールバック要約を返す
+    const fallbackSummary = `
+【動画の要約】
+動画タイトル: ${videoTitle || 'タイトルなし'}
+チャンネル: ${videoDescription ? '説明あり' : '説明なし'}
+
+この動画は読書に関連する内容のようです。
+動画を視聴して、読書の理解を深めるヒントを見つけてください。
+
+※AI要約機能が一時的に利用できません。動画を直接視聴することをお勧めします。
+    `;
+    
+    return { 
+      summary: fallbackSummary,
+      error: 'AI要約機能が一時的に利用できません。フォールバック要約を表示しています。'
+    };
   }
 });
 
