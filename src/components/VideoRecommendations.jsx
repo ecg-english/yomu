@@ -17,13 +17,9 @@ export default function VideoRecommendations({ bookId }) {
 
   const API_BASE = 'https://yomu-api.onrender.com';
 
-  useEffect(() => {
-    if (bookId) {
-      loadVideos();
-    }
-  }, [bookId]);
-
   const loadVideos = async () => {
+    if (!bookId) return;
+    
     setLoading(true);
     setError(null);
     setHasSearched(true);
